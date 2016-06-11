@@ -7,6 +7,7 @@ import java.util.Calendar.Builder;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.avaje.ebean.Ebean;
@@ -15,23 +16,42 @@ import com.foo.myapp.domain.Purchase.PurchaseStatus;
 
 public class CustomerTest {
 
-    @Test
-    public void test1() {
+    private CustomerDAO customerDAO;
+    private Customer alice;
+
+    @Before
+    public void setup() {
 	EbeanServer server = Ebean.getDefaultServer();
+	Ebean.deleteAll(Ebean.find(Purchase.class).findList());
+	Ebean.deleteAll(Ebean.find(Customer.class).findList());
 
 	Customer bob = new Customer("Rob");
 
 	server.save(bob);
 
-	Customer alice = new Customer("Alice");
+	alice = new Customer("Alice");
 	server.save(alice);
 
 
 	createPurchases(alice, 20, COMPLETE);
-	CustomerDAO customerDAO = new CustomerDAO();
+	customerDAO = new CustomerDAO();
+    }
+
+    @Test
+    public void testWorking() {
 	List<CustomerWithPurchaseStats> allCustomersWithPurchaseStatsWorking = customerDAO.getAllCustomersWithPurchaseStats_Working();
 	assertEquals(1, allCustomersWithPurchaseStatsWorking.size());
 	CustomerWithPurchaseStats aliceFound = allCustomersWithPurchaseStatsWorking.get(0);
+	assertEquals(aliceFound.getCustomer(), alice);
+	assertEquals(aliceFound.getCompletePurchaseCount(), 20);
+    }
+
+    @Test
+    public void testNotWorking() {
+	List<CustomerWithPurchaseStats> allCustomersWithPurchaseStatsWorking = customerDAO.getAllCustomersWithPurchaseStats_WhatIdLike();
+	assertEquals(1, allCustomersWithPurchaseStatsWorking.size());
+	CustomerWithPurchaseStats aliceFound = allCustomersWithPurchaseStatsWorking.get(0);
+	assertEquals(aliceFound.getCustomer(), alice);
 	assertEquals(aliceFound.getCompletePurchaseCount(), 20);
     }
 
