@@ -1,0 +1,10 @@
+/log/
+/*.sql
+/target/
+
+/.idea
+*.iml
+
+/.eclipse
+/.project
+/.classpath
