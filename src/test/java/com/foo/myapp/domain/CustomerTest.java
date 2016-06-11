@@ -1,73 +1,49 @@
 package com.foo.myapp.domain;
 
+import static com.foo.myapp.domain.Purchase.PurchaseStatus.COMPLETE;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Calendar.Builder;
+import java.util.Date;
+import java.util.List;
+
+import org.junit.Test;
+
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.EbeanServer;
-import org.testng.annotations.Test;
+import com.foo.myapp.domain.Purchase.PurchaseStatus;
 
-import static org.testng.Assert.*;
-
-/**
- * When running tests in the IDE install the "Enhancement plugin".
- *
- * http://ebean-orm.github.io/docs/setup/enhancement#ide
- *
- */
 public class CustomerTest {
 
-  Customer rob;
+    @Test
+    public void test1() {
+	EbeanServer server = Ebean.getDefaultServer();
 
-  /**
-   * Get the "default server" and save().
-   */
-  @Test
-  public void insert_via_server() {
+	Customer bob = new Customer("Rob");
 
-    rob = new Customer("Rob");
+	server.save(bob);
 
-    EbeanServer server = Ebean.getDefaultServer();
-    server.save(rob);
-
-    assertNotNull(rob.getId());
-  }
-
-  /**
-   * Use the Ebean singleton (effectively using the "default server").
-   */
-  @Test(dependsOnMethods = "insert_via_server")
-  public void insert_via_ebean() {
-
-    Customer sally = new Customer("Sally");
-    Ebean.save(sally);
-
-    assertNotNull(sally.getId());
-  }
+	Customer alice = new Customer("Alice");
+	server.save(alice);
 
 
-  /**
-   * Find and then update.
-   */
-  @Test(dependsOnMethods = "insert_via_server")
-  public void updateRob() {
+	createPurchases(alice, 20, COMPLETE);
+	CustomerDAO customerDAO = new CustomerDAO();
+	List<CustomerWithPurchaseStats> allCustomersWithPurchaseStatsWorking = customerDAO.getAllCustomersWithPurchaseStats_Working();
+	assertEquals(1, allCustomersWithPurchaseStatsWorking.size());
+	CustomerWithPurchaseStats aliceFound = allCustomersWithPurchaseStatsWorking.get(0);
+	assertEquals(aliceFound.getCompletePurchaseCount(), 20);
+    }
 
-    Customer rob = Ebean.find(Customer.class)
-        .where().eq("name", "Rob")
-        .findUnique();
 
-    rob.setNotes("Doing an update");
-    Ebean.save(rob);
-  }
-
-  /**
-   * Execute an update without a prior query.
-   */
-  @Test(dependsOnMethods = "updateRob")
-  public void statelessUpdate() {
-
-    Customer upd = new Customer();
-    upd.setId(rob.getId());
-    upd.setNotes("Update without a fetch");
-
-    Ebean.update(upd);
-  }
+    public void createPurchases(Customer customer, int count, PurchaseStatus status) {
+	Date deliveryDate = new Builder().setDate(2010, 5, 10).build().getTime();
+	for (int i = 0; i < count; i++) {
+	    Purchase purchase = new Purchase(customer);
+	    purchase.setStatus(status);
+	    purchase.setDeliveryDate(deliveryDate);
+	    Ebean.save(purchase);
+	}
+    }
 
 }

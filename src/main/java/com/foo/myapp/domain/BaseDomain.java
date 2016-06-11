@@ -1,37 +1,36 @@
 package com.foo.myapp.domain;
 
-import javax.persistence.MappedSuperclass;
 import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
-import com.avaje.ebean.Model;
 
-import java.time.OffsetDateTime;
+import com.avaje.ebean.Model;
 
 @MappedSuperclass
 public class BaseDomain extends Model {
 
-  @Id
-  Long id;
+    @Id
+    Long id;
 
-  @Version
-  Long version;
+    @Version
+    Long version;
 
-  // Usually also have whenCreated and whenModified
+    // Usually also have whenCreated and whenModified
 
-  public Long getId() {
-    return id;
-  }
+    public Long getId() {
+	return id;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public void setId(Long id) {
+	this.id = id;
+    }
 
-  public Long getVersion() {
-    return version;
-  }
+    public Long getVersion() {
+	return version;
+    }
 
-  public void setVersion(Long version) {
-    this.version = version;
-  }
+    public void setVersion(Long version) {
+	this.version = version;
+    }
 
 }
